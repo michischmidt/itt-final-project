@@ -42,9 +42,9 @@ DATA_LENGTH = 60
 TIME_FOR_DATA = 6000
 
 
-class ActivityRecognizer(QMainWindow):
+class Drumkit(QMainWindow):
     def __init__(self):
-        super(ActivityRecognizer, self).__init__()
+        super(Drumkit, self).__init__()
         self.__init_ui()
         self.init_logger(TRAINING_DATA_FILE)
         self.init_nodes()
@@ -59,7 +59,7 @@ class ActivityRecognizer(QMainWindow):
         self.update_gesture_list()
 
     def __init_ui(self):
-        self.setWindowTitle("DIPPID Activity Recognizer")
+        self.setWindowTitle("Drumkit")
         # Define a top-level widget to hold everything
 
         central_widget = QtGui.QWidget()
@@ -206,7 +206,7 @@ class ActivityRecognizer(QMainWindow):
         index = self.gesture_list_list_widget.currentIndex().row()
         self.gesture_data = self.gesture_data.drop(
             self.gesture_data.index[index])
-        print(self.gesture_data)
+        # print(self.gesture_data)
         self.update_gesture_list()
 
     def save_changes_to_csv(self):
@@ -422,7 +422,7 @@ if __name__ == "__main__":
     fclib.registerNodeType(TrainNode, [("TrainNode",)])
     fclib.registerNodeType(PredictionNode, [("PredictionNode",)])
     app = QtWidgets.QApplication([])
-    win = ActivityRecognizer()
+    win = Drumkit()
 
     win.show()
     if (sys.flags.interactive != 1) or not hasattr(QtCore, "PYQT_VERSION"):
