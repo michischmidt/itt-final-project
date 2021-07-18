@@ -14,7 +14,10 @@ import pyqtgraph.flowchart.library as fclib
 import pandas as pd
 import os
 from sklearn import svm
+from sklearn.ensemble import AdaBoostClassifier
 from numpy import fromstring
+import time
+import fluidsynth
 
 
 '''
@@ -35,11 +38,11 @@ as string.
 TRAINING_DATA_FILE = "training_data.csv"
 
 # The amount of transformed signals from the dippid we use for 1 gesture;
-# the transfomation cuts the dippid singal amount in half
+# the transfomation cuts the dippid signal amount in half
 # to calculate to time per gesture do:
-# DATA_LENGTH / DippidFrequency/ * 2
+# DATA_LENGTH / DippidFrequency * 2
 DATA_LENGTH = 60
-TIME_FOR_DATA = 6000
+TIME_FOR_DATA = 30000
 
 
 class Drumkit(QMainWindow):
@@ -119,7 +122,7 @@ class Drumkit(QMainWindow):
         self.train_control_widget.setLayout(QtWidgets.QVBoxLayout())
         self.train_button = QtWidgets.QPushButton("Start Training")
         self.train_button.clicked.connect(self.train_button_press)
-        self.train_name_input = QtWidgets.QLineEdit("Set  Gesture Name here")
+        self.train_name_input = QtWidgets.QLineEdit("Hit")
         self.train_control_widget.layout().addWidget(self.train_name_input)
         self.train_control_widget.layout().addWidget(self.train_button)
         self.main_control_widget.layout().addWidget(
@@ -262,7 +265,13 @@ class Drumkit(QMainWindow):
 
 
 class PredictionNode(Node):
+    counter = 0
     nodeName = "PredictionNode"
+    fs = fluidsynth.Synth(1)
+    fs.start(driver='alsa')
+    sfid = fs.sfload('./pns_drum.sf2')
+    # select MIDI track, sound font, MIDI bank and preset
+    fs.program_select(0, sfid, 0, 0)
 
     def __init__(self, name):
         Node.__init__(self, name, terminals={
@@ -279,7 +288,7 @@ class PredictionNode(Node):
 
     def init_svm_with_data(self, data):
         print("initsvm with data")
-        print(data)
+        # print(data)
         self.training_data_dict = data
         self.classifier = svm.SVC()
         categories = []
@@ -317,12 +326,23 @@ class PredictionNode(Node):
             svm_data_array += x_cut + y_cut + z_cut
         return [svm_data_array]
 
+    # testing sound accuracy
+    def make_sound(self, predicition_data):
+        if (self.classifier.predict(predicition_data)[0] == 1):
+            self.fs.noteon(0, 35, 100)
+            time.sleep(0.3)
+            self.fs.noteoff(0, 35)
+        # print("Break: " + str(self.counter))
+        # self.counter += 1
+        # print(self.classifier.predict(predicition_data)[0])
+
     def get_prediction(self):
         input_data = []
         input_data.append(self.current_gesture_x_frequencies)
         input_data.append(self.current_gesture_y_frequencies)
         input_data.append(self.current_gesture_z_frequencies)
         predicition_data = self.get_svm_data_array(input_data)
+        self.make_sound(predicition_data)
         return list(self.training_data_dict.keys())[self.classifier.predict(predicition_data)[0]]
 
     def process(self, **kwds):
