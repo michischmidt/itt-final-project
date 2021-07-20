@@ -10,7 +10,7 @@ import pyqtgraph as pg
 import numpy as np
 from DIPPID import SensorUDP, SensorSerial, SensorWiimote
 import sys
-from drumkit import FftNode
+from FFTNode import FftNode
 
 
 class BufferNode(Node):
@@ -91,7 +91,7 @@ class DIPPIDNode(Node):
         self.update_rate_input = QtGui.QSpinBox()
         self.update_rate_input.setMinimum(0)
         self.update_rate_input.setMaximum(60)
-        self.update_rate_input.setValue(20)
+        self.update_rate_input.setValue(30)
         self.update_rate_input.valueChanged.connect(self.set_update_rate)
         self.layout.addWidget(self.update_rate_input)
 
