@@ -42,7 +42,7 @@ TRAINING_DATA_FILE = "training_data.csv"
 # to calculate to time per gesture do:
 # DATA_LENGTH / DippidFrequency * 2
 DATA_LENGTH = 60
-TIME_FOR_DATA = 30000
+TIME_FOR_DATA = 10000
 
 
 class Drumkit(QMainWindow):
