@@ -152,7 +152,7 @@ class Drumkit(QMainWindow):
             self.connection_error_label.setText("")
             if not self.is_predicting:
                 self.update_prediction_node_data()
-                self.prediction_timer.start(500)
+                self.prediction_timer.start(400)
                 self.is_predicting = True
                 self.predict_button.setText("Stop Predicting")
             else:
@@ -330,9 +330,8 @@ class PredictionNode(Node):
 
     # testing sound accuracy
     def make_sound(self, result):
-        if (result == 1):
+        if (result > 0):
             self.fs.noteon(0, 35, 100)
-            time.sleep(0.3)
             self.fs.noteoff(0, 35)
 
     def get_prediction(self):
