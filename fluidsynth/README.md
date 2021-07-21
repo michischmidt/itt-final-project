@@ -22,6 +22,8 @@ pip3 install pyfluidsynth
 
 ## Usage
 
+https://github.com/nwhitehead/pyfluidsynth
+
 ### FluidSynth CLI
 
 FluidSynth can be run from the command line as a standalone MIDI synthesizer.
