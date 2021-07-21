@@ -4,8 +4,8 @@ import numpy as np
 DATA_LENGTH = 60
 
 # custom FFT node for frequency spectrogram output
-class FftNode(Node):
-    nodeName = "FftNode"
+class ConvolveNode(Node):
+    nodeName = "ConvolveNode"
 
     def __init__(self, name):
         Node.__init__(self, name, terminals={
@@ -22,18 +22,15 @@ class FftNode(Node):
         self.current_data_y = []
         self.current_data_z = []
 
-    def calculate_frequency(self, data):
+    def convolve_signal(self, data):
         try:
-            #  we only want to get [DATA_LENGTH] frequencies
-            #  from the last signals. Since our forier
-            #  transformation cuts the data amount throught 2
-            #  we use len(data)/2 for this
-            while len(data)/2 > DATA_LENGTH:
-                data = data[1:]
-            n = len(data)
-            # fft computing and normalization and
-            # use only first half as the function is mirrored
-            frequenzy = np.abs(np.fft.fft(data) / n)[0:int(n / 2)]
+            # kernel_avg = np.zeros(101)
+            # for i in range(47,53):
+            #     kernel_avg[i] = 1.0 / 6
+            kernel_size = 20
+            kernel_avg = np.ones(kernel_size) / kernel_size
+            
+            frequenzy = np.convolve(data, kernel_avg, mode="same")
 
             # tolist() to convert from np.ndarray
             return frequenzy.tolist()
@@ -48,9 +45,9 @@ class FftNode(Node):
         self.current_data_x.append(kwds["accelX"][-1])
         self.current_data_y.append(kwds["accelY"][-1])
         self.current_data_z.append(kwds["accelZ"][-1])
-        x_frequency = self.calculate_frequency(self.current_data_x)
-        y_frequency = self.calculate_frequency(self.current_data_y)
-        z_frequency = self.calculate_frequency(self.current_data_z)
+        x_frequency = self.convolve_signal(self.current_data_x)
+        y_frequency = self.convolve_signal(self.current_data_y)
+        z_frequency = self.convolve_signal(self.current_data_z)
 
         return {'frequencyX': np.array(x_frequency),
                 'frequencyY': np.array(y_frequency),

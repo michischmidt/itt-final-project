@@ -11,6 +11,7 @@ import numpy as np
 from DIPPID import SensorUDP, SensorSerial, SensorWiimote
 import sys
 from FFTNode import FftNode
+from ConvolutionNode import ConvolveNode
 
 
 class BufferNode(Node):
@@ -91,7 +92,7 @@ class DIPPIDNode(Node):
         self.update_rate_input = QtGui.QSpinBox()
         self.update_rate_input.setMinimum(0)
         self.update_rate_input.setMaximum(60)
-        self.update_rate_input.setValue(30)
+        self.update_rate_input.setValue(20)
         self.update_rate_input.valueChanged.connect(self.set_update_rate)
         self.layout.addWidget(self.update_rate_input)
 
@@ -161,11 +162,12 @@ class DIPPIDNode(Node):
 
 fclib.registerNodeType(DIPPIDNode, [('Sensor',)])
 fclib.registerNodeType(FftNode, [("FftNode",)])
+fclib.registerNodeType(ConvolveNode, [("ConvolveNode",)])
 
 
-def xPlot(fc, fftNode, dippidNode):
+def xPlot(fc, node, dippidNode, xPos):
     pw1 = pg.PlotWidget()
-    layout.addWidget(pw1, 0, 1)
+    layout.addWidget(pw1, xPos, 1)
     pw1.setYRange(0, 1)
 
     pw1Node = fc.createNode('PlotWidget', pos=(0, -150))
@@ -177,19 +179,19 @@ def xPlot(fc, fftNode, dippidNode):
     fc.connectTerminals(bufferNodeX['dataOut'], pw1Node['In'])
 
     pw2 = pg.PlotWidget()
-    layout.addWidget(pw2, 0, 2)
+    layout.addWidget(pw2, xPos, 2)
     pw2.setYRange(0, 1)
 
     pw2Node = fc.createNode('PlotWidget', pos=(0, -300))
     pw2Node.setPlot(pw2)
 
-    fc.connectTerminals(bufferNodeX['dataOut'], fftNode['accelX'])
-    fc.connectTerminals(fftNode['frequencyX'], pw2Node['In'])
+    fc.connectTerminals(bufferNodeX['dataOut'], node['accelX'])
+    fc.connectTerminals(node['frequencyX'], pw2Node['In'])
 
 
-def yPlot(fc, fftNode, dippidNode):
+def yPlot(fc, node, dippidNode, xPos):
     pw1 = pg.PlotWidget()
-    layout.addWidget(pw1, 1, 1)
+    layout.addWidget(pw1, xPos, 1)
     pw1.setYRange(0, 1)
 
     pw1Node = fc.createNode('PlotWidget', pos=(0, -150))
@@ -201,19 +203,19 @@ def yPlot(fc, fftNode, dippidNode):
     fc.connectTerminals(bufferNodeY['dataOut'], pw1Node['In'])
 
     pw2 = pg.PlotWidget()
-    layout.addWidget(pw2, 1, 2)
+    layout.addWidget(pw2, xPos, 2)
     pw2.setYRange(0, 1)
 
     pw2Node = fc.createNode('PlotWidget', pos=(0, -300))
     pw2Node.setPlot(pw2)
 
-    fc.connectTerminals(bufferNodeY['dataOut'], fftNode['accelY'])
-    fc.connectTerminals(fftNode['frequencyY'], pw2Node['In'])
+    fc.connectTerminals(bufferNodeY['dataOut'], node['accelY'])
+    fc.connectTerminals(node['frequencyY'], pw2Node['In'])
 
 
-def zPlot(fc, fftNode, dippidNode):
+def zPlot(fc, node, dippidNode, xPos):
     pw1 = pg.PlotWidget()
-    layout.addWidget(pw1, 2, 1)
+    layout.addWidget(pw1, xPos, 1)
     pw1.setYRange(0, 1)
 
     pw1Node = fc.createNode('PlotWidget', pos=(0, -150))
@@ -225,14 +227,14 @@ def zPlot(fc, fftNode, dippidNode):
     fc.connectTerminals(bufferNodeZ['dataOut'], pw1Node['In'])
 
     pw2 = pg.PlotWidget()
-    layout.addWidget(pw2, 2, 2)
+    layout.addWidget(pw2, xPos, 2)
     pw2.setYRange(0, 1)
 
     pw2Node = fc.createNode('PlotWidget', pos=(0, -300))
     pw2Node.setPlot(pw2)
 
-    fc.connectTerminals(bufferNodeZ['dataOut'], fftNode['accelZ'])
-    fc.connectTerminals(fftNode['frequencyZ'], pw2Node['In'])
+    fc.connectTerminals(bufferNodeZ['dataOut'], node['accelZ'])
+    fc.connectTerminals(node['frequencyZ'], pw2Node['In'])
 
 
 if __name__ == '__main__':
@@ -250,10 +252,14 @@ if __name__ == '__main__':
 
     layout.addWidget(fc.widget(), 0, 0, 2, 1)
     dippidNode = fc.createNode("DIPPID", pos=(0, 0))
-    fftNode = fc.createNode("FftNode", pos=(0, 0))
-    xPlot(fc, fftNode, dippidNode)
-    yPlot(fc, fftNode, dippidNode)
-    zPlot(fc, fftNode, dippidNode)
+    fftNode = fc.createNode("FftNode", pos=(0, 150))
+    convolveNode = fc.createNode("ConvolveNode", pos=(0, 300))
+    # xPlot(fc, fftNode, dippidNode, 0)
+    # yPlot(fc, fftNode, dippidNode, 1)
+    # zPlot(fc, fftNode, dippidNode, 2)
+    xPlot(fc, convolveNode, dippidNode, 1)
+    yPlot(fc, convolveNode, dippidNode, 2)
+    zPlot(fc, convolveNode, dippidNode, 3)
 
     win.show()
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):

@@ -40,8 +40,8 @@ TRAINING_DATA_FILE = "training_data.csv"
 # The amount of transformed signals from the dippid we use for 1 gesture;
 # the transfomation cuts the dippid signal amount in half
 # to calculate to time per gesture do:
-# DATA_LENGTH / DippidFrequency * 2
-DATA_LENGTH = 70
+# DATA_LENGTH / (DippidFrequency * 2)
+DATA_LENGTH = 60
 TIME_FOR_DATA = 10000
 
 
@@ -122,7 +122,7 @@ class Drumkit(QMainWindow):
         self.train_control_widget.setLayout(QtWidgets.QVBoxLayout())
         self.train_button = QtWidgets.QPushButton("Start Training")
         self.train_button.clicked.connect(self.train_button_press)
-        self.train_name_input = QtWidgets.QLineEdit("Hit")
+        self.train_name_input = QtWidgets.QLineEdit("Nothing")
         self.train_control_widget.layout().addWidget(self.train_name_input)
         self.train_control_widget.layout().addWidget(self.train_button)
         self.main_control_widget.layout().addWidget(
@@ -152,7 +152,7 @@ class Drumkit(QMainWindow):
             self.connection_error_label.setText("")
             if not self.is_predicting:
                 self.update_prediction_node_data()
-                self.prediction_timer.start(500)
+                self.prediction_timer.start(1000)
                 self.is_predicting = True
                 self.predict_button.setText("Stop Predicting")
             else:
@@ -193,6 +193,8 @@ class Drumkit(QMainWindow):
              'frequenciesY': self.train_node.get_current_frequencies_as_string("|")[1],
              'frequenciesZ': self.train_node.get_current_frequencies_as_string("|")[2]},
             ignore_index=True)
+        print(self.gesture_data)
+        self.gesture_data.to_csv(TRAINING_DATA_FILE, header=True, index=False, index_label=False)
         self.train_button.setDisabled(False)
         self.train_button.setText("Start Training")
         self.update_gesture_list()
@@ -327,16 +329,11 @@ class PredictionNode(Node):
         return [svm_data_array]
 
     # testing sound accuracy
-    def make_sound(self, predicition_data):
-        result = self.classifier.predict_proba(predicition_data, 1)
-        print(result)
-        if (self.classifier.pred(predicition_data)[0] == 1):
+    def make_sound(self, result):
+        if (result == 1):
             self.fs.noteon(0, 35, 100)
             time.sleep(0.3)
             self.fs.noteoff(0, 35)
-        # print("Break: " + str(self.counter))
-        # self.counter += 1
-        # print(self.classifier.predict(predicition_data)[0])
 
     def get_prediction(self):
         input_data = []
@@ -344,8 +341,10 @@ class PredictionNode(Node):
         input_data.append(self.current_gesture_y_frequencies)
         input_data.append(self.current_gesture_z_frequencies)
         predicition_data = self.get_svm_data_array(input_data)
-        self.make_sound(predicition_data)
-        return list(self.training_data_dict.keys())[self.classifier.predict(predicition_data)[0]]
+        result = self.classifier.predict(predicition_data)[0]
+        print(result)
+        self.make_sound(result)
+        return list(self.training_data_dict.keys())[result]
 
     def process(self, **kwds):
         # Get the last values from our accelerator data
@@ -386,7 +385,7 @@ class TrainNode(Node):
 
 
 if __name__ == "__main__":
-    fclib.registerNodeType(FftNode, [("FftNode",)])
+    # fclib.registerNodeType(FftNode, [("FftNode",)])
     fclib.registerNodeType(TrainNode, [("TrainNode",)])
     fclib.registerNodeType(PredictionNode, [("PredictionNode",)])
     app = QtWidgets.QApplication([])
