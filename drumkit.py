@@ -14,11 +14,11 @@ import pyqtgraph.flowchart.library as fclib
 import pandas as pd
 import os
 from sklearn import svm
-from sklearn.ensemble import AdaBoostClassifier
 from numpy import fromstring
 import time
 import fluidsynth
 from FFTNode import FftNode
+from ConvolutionNode import ConvolveNode
 
 '''
 Custom SVM node which can be switched between
@@ -41,8 +41,8 @@ TRAINING_DATA_FILE = "training_data.csv"
 # the transfomation cuts the dippid signal amount in half
 # to calculate to time per gesture do:
 # DATA_LENGTH / (DippidFrequency * 2)
-DATA_LENGTH = 60
-TIME_FOR_DATA = 10000
+DATA_LENGTH = 30
+TIME_FOR_DATA = 30000
 
 
 class Drumkit(QMainWindow):
@@ -86,7 +86,7 @@ class Drumkit(QMainWindow):
         self.prediction_node = self.fc.createNode(
             "PredictionNode", pos=(450, 150))
         # create FFT node
-        self.fft_node = self.fc.createNode("FftNode", pos=(300, 100))
+        self.fft_node = self.fc.createNode("ConvolveNode", pos=(300, 100))
 
         # init user input ui
         self.main_control_widget = QtWidgets.QWidget()
@@ -152,7 +152,7 @@ class Drumkit(QMainWindow):
             self.connection_error_label.setText("")
             if not self.is_predicting:
                 self.update_prediction_node_data()
-                self.prediction_timer.start(1000)
+                self.prediction_timer.start(500)
                 self.is_predicting = True
                 self.predict_button.setText("Stop Predicting")
             else:
@@ -342,7 +342,6 @@ class PredictionNode(Node):
         input_data.append(self.current_gesture_z_frequencies)
         predicition_data = self.get_svm_data_array(input_data)
         result = self.classifier.predict(predicition_data)[0]
-        print(result)
         self.make_sound(result)
         return list(self.training_data_dict.keys())[result]
 
@@ -386,6 +385,7 @@ class TrainNode(Node):
 
 if __name__ == "__main__":
     # fclib.registerNodeType(FftNode, [("FftNode",)])
+    # fclib.registerNodeType(ConvolveNode, [("ConvolveNode",)])
     fclib.registerNodeType(TrainNode, [("TrainNode",)])
     fclib.registerNodeType(PredictionNode, [("PredictionNode",)])
     app = QtWidgets.QApplication([])

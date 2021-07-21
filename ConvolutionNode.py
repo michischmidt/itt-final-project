@@ -1,7 +1,7 @@
 from pyqtgraph.flowchart import Flowchart, Node
 import numpy as np
 
-DATA_LENGTH = 60
+DATA_LENGTH = 30
 
 # custom FFT node for frequency spectrogram output
 class ConvolveNode(Node):
@@ -27,11 +27,14 @@ class ConvolveNode(Node):
             # kernel_avg = np.zeros(101)
             # for i in range(47,53):
             #     kernel_avg[i] = 1.0 / 6
-            kernel_size = 20
+            while len(data) > DATA_LENGTH:
+                data = data[1:]
+            n = len(data)
+            kernel_size = 10
             kernel_avg = np.ones(kernel_size) / kernel_size
             
-            frequenzy = np.convolve(data, kernel_avg, mode="same")
-
+            frequenzy = np.abs(np.convolve(data, kernel_avg, mode="same"))[0:int(n)]
+            # print(frequenzy)
             # tolist() to convert from np.ndarray
             return frequenzy.tolist()
         except Exception as e:

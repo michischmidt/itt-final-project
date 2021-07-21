@@ -92,7 +92,7 @@ class DIPPIDNode(Node):
         self.update_rate_input = QtGui.QSpinBox()
         self.update_rate_input.setMinimum(0)
         self.update_rate_input.setMaximum(60)
-        self.update_rate_input.setValue(20)
+        self.update_rate_input.setValue(30)
         self.update_rate_input.valueChanged.connect(self.set_update_rate)
         self.layout.addWidget(self.update_rate_input)
 
@@ -254,12 +254,12 @@ if __name__ == '__main__':
     dippidNode = fc.createNode("DIPPID", pos=(0, 0))
     fftNode = fc.createNode("FftNode", pos=(0, 150))
     convolveNode = fc.createNode("ConvolveNode", pos=(0, 300))
-    # xPlot(fc, fftNode, dippidNode, 0)
-    # yPlot(fc, fftNode, dippidNode, 1)
-    # zPlot(fc, fftNode, dippidNode, 2)
-    xPlot(fc, convolveNode, dippidNode, 1)
-    yPlot(fc, convolveNode, dippidNode, 2)
-    zPlot(fc, convolveNode, dippidNode, 3)
+    xPlot(fc, fftNode, dippidNode, 0)
+    yPlot(fc, fftNode, dippidNode, 1)
+    zPlot(fc, fftNode, dippidNode, 2)
+    xPlot(fc, convolveNode, dippidNode, 3)
+    yPlot(fc, convolveNode, dippidNode, 4)
+    zPlot(fc, convolveNode, dippidNode, 5)
 
     win.show()
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):

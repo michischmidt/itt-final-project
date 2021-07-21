@@ -15,7 +15,7 @@ fs.start(driver='alsa')
 # there are many different free sound fonts available in the web
 # in this case we use the default general midi sound font
 # sfid = fs.sfload('/usr/share/sounds/sf2/default-GM.sf2')
-sfid = fs.sfload('/home/michael/Downloads/pns_drum.sf2')
+sfid = fs.sfload('./pns_drum.sf2')
 # sfid = fs.sfload('/home/michael/Downloads/acoustic_guitars.sf2')
 
 # select MIDI track, sound font, MIDI bank and preset
