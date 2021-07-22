@@ -34,7 +34,6 @@ class ConvolveNode(Node):
             kernel_avg = np.ones(kernel_size) / kernel_size
             
             frequenzy = np.abs(np.convolve(data, kernel_avg, mode="same"))[0:int(n)]
-            # print(frequenzy)
             # tolist() to convert from np.ndarray
             return frequenzy.tolist()
         except Exception as e:
