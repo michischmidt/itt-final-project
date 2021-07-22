@@ -12,6 +12,7 @@ from playsound import playsound
 '''
 RecordAudio saves records in a temporary folder.
 Records can be played, deleted and exported.
+Actions as as adding records, deleting one record or even all records can be undone.
 '''
 
 class RecordAudio:
@@ -24,6 +25,7 @@ class RecordAudio:
 
     def __init__(self):
         self.audio_paths = []
+        self.undo_stack = []
         self.tmpdir = tempfile.mkdtemp()
 
     def add_record(self, raw_audio_string):
@@ -35,11 +37,15 @@ class RecordAudio:
         wf.writeframes(raw_audio_string)
         wf.close()
         self.audio_paths.append(filepath)
+        self.undo_stack.append(self.audio_paths[:])
 
     def remove_all(self):
-        for file in self.audio_paths:
-            os.remove(file)
         self.audio_paths = []
+        self.undo_stack.append(self.audio_paths[:])
+
+    def remove_one(self, index):
+        del self.audio_paths[index]
+        self.undo_stack.append(self.audio_paths[:])
 
     def play(self, index):
         playsound(self.audio_paths[index])
@@ -62,8 +68,12 @@ class RecordAudio:
         playsound(outfile)
 
     def undo(self):
-        file = self.audio_paths.pop()
-        os.remove(file)
+        if len(self.undo_stack) > 1:
+            del self.undo_stack[-1]
+            self.audio_paths = self.undo_stack[-1]
+        elif len(self.undo_stack) == 1:
+            self.undo_stack = []
+            self.audio_paths = []
 
     def export_record(self):
         outfile = "output.wav"
@@ -79,43 +89,47 @@ class RecordAudio:
             output.writeframes(data[i][1])
         output.close()
 
-s = []
+# s = []
 
-fl = fluidsynth.Synth()
+# fl = fluidsynth.Synth()
 
-# Initial silence is 1 second
-s = numpy.append(s, fl.get_samples(44100 * 1))
-fl.start(driver='alsa')
-sfid = fl.sfload('./pns_drum.sf2')
-fl.program_select(0, sfid, 0, 0)
+# # Initial silence is 1 second
+# s = numpy.append(s, fl.get_samples(44100 * 1))
+# fl.start(driver='alsa')
+# sfid = fl.sfload('./pns_drum.sf2')
+# fl.program_select(0, sfid, 0, 0)
 
-fl.noteon(0, 35, 100)
+# fl.noteon(0, 35, 100)
 
-# Chord is held for 2 seconds
-for i in range(8):
-    s = numpy.append(s, fl.get_samples(int(44100 * 0.1)))
-    fl.noteon(0, 38, 100)
-    fl.noteon(0, 46, 100)
+# # Chord is held for 2 seconds
+# for i in range(8):
+#     s = numpy.append(s, fl.get_samples(int(44100 * 0.1)))
+#     fl.noteon(0, 38, 100)
+#     fl.noteon(0, 46, 100)
 
-# Chord is held for 2 seconds
-s = numpy.append(s, fl.get_samples(44100 * 1))
+# # Chord is held for 2 seconds
+# s = numpy.append(s, fl.get_samples(44100 * 1))
 
-fl.noteon(0, 46, 100)
+# fl.noteon(0, 46, 100)
 
-# Decay of chord is held for 1 second
-s = numpy.append(s, fl.get_samples(44100 * 1))
+# # Decay of chord is held for 1 second
+# s = numpy.append(s, fl.get_samples(44100 * 1))
 
-fl.delete()
+# fl.delete()
 
-samps = fluidsynth.raw_audio_string(s)
+# samps = fluidsynth.raw_audio_string(s)
 
-recorder = RecordAudio()
+# recorder = RecordAudio()
 
-recorder.add_record(samps)
-recorder.add_record(samps)
+# recorder.add_record(samps)
+# recorder.add_record(samps)
 
-recorder.undo()
+# print(recorder.get_audios())
+# recorder.remove_all()
+# print(recorder.get_audios())
+# recorder.undo()
+# print(recorder.get_audios())
 
-time.sleep(1)
+# # time.sleep(1)
 
-recorder.play_all()
+# # recorder.play_all()
