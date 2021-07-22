@@ -1,9 +1,18 @@
 import time
 import numpy
+from numpy.core.records import record
 import pyaudio
 import fluidsynth
 import os
 import wave
+import tempfile
+from uuid import uuid4
+from playsound import playsound
+
+'''
+RecordAudio saves records in a temporary folder.
+Records can be played, deleted and exported.
+'''
 
 class RecordAudio:
 
@@ -11,52 +20,64 @@ class RecordAudio:
     channels = 2
     fs = 44100  # Record at 44100 samples per second
     filename = "output.wav"
+    sampwidth = 2
 
     def __init__(self):
-        self.__fix_pulseaudio()
-        self.raw_audio_strings = []
-        self.pa = pyaudio.PyAudio()
-        self.strm = self.pa.open(
-            format = self.sample_format,
-            channels = self.channels, 
-            rate = self.fs, 
-            output = True)
+        self.audio_paths = []
+        self.tmpdir = tempfile.mkdtemp()
 
-    def add_record(self, raw_audio_strings):
-        self.raw_audio_strings.append(raw_audio_strings)
-
-    def remove_record(self, index):
-        del self.raw_audio_strings[index]
+    def add_record(self, raw_audio_string):
+        filepath = os.path.join(self.tmpdir, str(uuid4()) + ".wav")
+        wf = wave.open(filepath, "wb")
+        wf.setnchannels(self.channels)
+        wf.setsampwidth(self.sampwidth)
+        wf.setframerate(self.fs)
+        wf.writeframes(raw_audio_string)
+        wf.close()
+        self.audio_paths.append(filepath)
 
     def remove_all(self):
-        self.raw_audio_strings = []
+        for file in self.audio_paths:
+            os.remove(file)
+        self.audio_paths = []
 
     def play(self, index):
-        self.strm.write(self.raw_audio_strings[index])
+        playsound(self.audio_paths[index])
 
+    # creates new temporary directory to create an outputfile
+    # of all audio files and plays it
     def play_all(self):
-        complete_audio = b"".join(self.raw_audio_strings)
-        self.strm.write(complete_audio)
-
-    def create_wav_file(self):
-        print("hi")
+        outfile = os.path.join(tempfile.mkdtemp(), "output.wav")
+        data= []
+        for infile in self.audio_paths:
+            w = wave.open(infile, 'rb')
+            data.append( [w.getparams(), w.readframes(w.getnframes())] )
+            w.close()
+            
+        output = wave.open(outfile, 'wb')
+        output.setparams(data[0][0])
+        for i in range(len(data)):
+            output.writeframes(data[i][1])
+        output.close()
+        playsound(outfile)
 
     def undo(self):
-        del self.raw_audio_strings[-1]
+        file = self.audio_paths.pop()
+        os.remove(file)
 
     def export_record(self):
-        complete_audio = b"".join(self.raw_audio_strings)
-        wf = wave.open("output.wav", "wb")
-        wf.setnchannels(self.channels)
-        wf.setsampwidth(self.pa.get_sample_size(self.sample_format))
-        wf.setframerate(self.fs)
-        wf.writeframes(complete_audio)
-        wf.close()
-
-
-    def __fix_pulseaudio(self):
-        os.system("aconnect -x && pulseaudio --kill && systemctl --user stop pulseaudio.socket && systemctl --user stop pulseaudio.service && sleep 2 && pulseaudio --start")
-
+        outfile = "output.wav"
+        data= []
+        for infile in self.audio_paths:
+            w = wave.open(infile, 'rb')
+            data.append( [w.getparams(), w.readframes(w.getnframes())] )
+            w.close()
+            
+        output = wave.open(outfile, 'wb')
+        output.setparams(data[0][0])
+        for i in range(len(data)):
+            output.writeframes(data[i][1])
+        output.close()
 
 s = []
 
@@ -71,8 +92,8 @@ fl.program_select(0, sfid, 0, 0)
 fl.noteon(0, 35, 100)
 
 # Chord is held for 2 seconds
-for i in range(2):
-    s = numpy.append(s, fl.get_samples(int(44100 * 1.4)))
+for i in range(8):
+    s = numpy.append(s, fl.get_samples(int(44100 * 0.1)))
     fl.noteon(0, 38, 100)
     fl.noteon(0, 46, 100)
 
@@ -91,14 +112,10 @@ samps = fluidsynth.raw_audio_string(s)
 recorder = RecordAudio()
 
 recorder.add_record(samps)
-
 recorder.add_record(samps)
 
 recorder.undo()
 
+time.sleep(1)
 
 recorder.play_all()
-
-recorder.export_record()
-
-
