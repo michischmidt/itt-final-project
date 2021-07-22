@@ -38,9 +38,12 @@ class Drumkit(QtWidgets.QMainWindow):
         self.initUI()
         self.init_logger(TRAINING_DATA_FILE)
         self.init_nodes()
-        self.is_predicting = False
-        self.prediction_timer = QtCore.QTimer()
-        self.prediction_timer.timeout.connect(self.update_prediction)
+        self.is_predicting0 = False
+        self.prediction_timer0 = QtCore.QTimer()
+        self.prediction_timer0.timeout.connect(self.update_prediction_device0)
+        self.is_predicting1 = False
+        self.prediction_timer1 = QtCore.QTimer()
+        self.prediction_timer1.timeout.connect(self.update_prediction_device1)
         self.gesture_list = []
         self.current_training_data_dict = {}
         self.connectButtons()
@@ -95,7 +98,8 @@ class Drumkit(QtWidgets.QMainWindow):
         self.device2_btn_labels.append(self.ui.label_btnDevice2_3)
 
         # create Train node
-        self.train_node = self.fc.createNode("TrainNode", pos=(450, 150))
+        self.train_node0 = self.fc.createNode("TrainNode", pos=(450, 150))
+        self.train_node1 = self.fc.createNode("TrainNode", pos=(450, 300))
 
         # create Prediction node
         self.prediction_node0 = self.fc.createNode(
@@ -110,43 +114,65 @@ class Drumkit(QtWidgets.QMainWindow):
 
     def connectButtons(self):
         # buttons to connect devices
-        self.ui.btnConnect1.clicked.connect(lambda x: self.__connectDevice1())
-        self.ui.btnConnect2.clicked.connect(lambda x: self.__connectDevice2())
+        self.ui.btnConnect0.clicked.connect(lambda x: self.__connectDevice1())
+        self.ui.btnConnect1.clicked.connect(lambda x: self.__connectDevice2())
 
         # buttons to start playing each device
         self.ui.btnStartPrediction0.clicked.connect(
-            lambda x: self.predict_button_press(self.convolveNode0, self.errorLabel0, self.btnStartPrediction0))
+            lambda x: self.predict_button_press_device0())
         self.ui.btnStartPrediction1.clicked.connect(
-            lambda x: self.predict_button_press(self.convolveNode1, self.errorLabel1, self.btnStartPrediction1))
+            lambda x: self.predict_button_press_device1())
 
     def __connectDevice1(self):
         hz_device_1 = self.ui.lineEditConnect1.text()
         print(f'connect device 1 with {hz_device_1}hz')
         self.dippid_node0.connect_device(5700, 30)
+        self.btnConnect0.setText("Connected")
+        self.btnConnect0.setDisabled(True)
 
     def __connectDevice2(self):
         hz_device_2 = self.ui.lineEditConnect2.text()
         print(f'connect device 2 with {hz_device_2}hz')
         self.dippid_node1.connect_device(5701, 30)
+        self.btnConnect1.setText("Connected")
+        self.btnConnect1.setDisabled(True)
 
-    def predict_button_press(self, convolveNode, errorLabel, btn):
-        if convolveNode.get_had_input_yet():
-            errorLabel.setText("")
-            if not self.is_predicting:
+    def predict_button_press_device0(self):
+        if self.convolveNode0.get_had_input_yet():
+            self.errorLabel0.setText("")
+            if not self.is_predicting0:
                 self.update_prediction_node_data()
-                self.prediction_timer.start(400)
-                self.is_predicting = True
-                btn.setText("Stop Playing.")
+                self.prediction_timer0.start(400)
+                self.is_predicting0 = True
+                self.btnStartPrediction0.setText("Stop Playing.")
             else:
-                self.prediction_timer.stop()
-                self.is_predicting = False
-                btn.setText("Start Playing again!")
+                self.prediction_timer0.stop()
+                self.is_predicting0 = False
+                self.btnStartPrediction0.setText("Start Playing! (Device 1)")
         else:
-            errorLabel.setText(
-                "Dippid device not connected, please try again to connect your first Device")
+            self.errorLabel0.setText(
+                "Err! Connect Device first.")
 
-    def update_prediction(self):
+    def predict_button_press_device1(self):
+        if self.convolveNode1.get_had_input_yet():
+            self.errorLabel1.setText("")
+            if not self.is_predicting1:
+                self.update_prediction_node_data()
+                self.prediction_timer1.start(400)
+                self.is_predicting1 = True
+                self.btnStartPrediction1.setText("Stop Playing.")
+            else:
+                self.prediction_timer1.stop()
+                self.is_predicting1 = False
+                self.btnStartPrediction1.setText("Start Playing! (Device 2)")
+        else:
+            self.errorLabel1.setText(
+                "Err! Connect Device first.")
+
+    def update_prediction_device0(self):
         self.prediction_node0.get_prediction()
+
+    def update_prediction_device1(self):
         self.prediction_node1.get_prediction()
 
     def init_logger(self, filename):
@@ -167,6 +193,8 @@ class Drumkit(QtWidgets.QMainWindow):
             self.current_training_data_dict[gesture_name] = {
                 "x": gesture_x_frequencies, "y": gesture_y_frequencies, "z": gesture_z_frequencies}
         self.prediction_node0.init_svm_with_data(
+            self.current_training_data_dict)
+        self.prediction_node1.init_svm_with_data(
             self.current_training_data_dict)
 
     def init_nodes(self):
@@ -209,11 +237,19 @@ class Drumkit(QtWidgets.QMainWindow):
 
         # connect train node to accelerator values
         self.fc.connectTerminals(
-            self.train_node["accelerator_x"], self.convolveNode0["frequencyX"])
+            self.train_node0["accelerator_x"], self.convolveNode0["frequencyX"])
         self.fc.connectTerminals(
-            self.train_node["accelerator_y"], self.convolveNode0["frequencyY"])
+            self.train_node0["accelerator_y"], self.convolveNode0["frequencyY"])
         self.fc.connectTerminals(
-            self.train_node["accelerator_z"], self.convolveNode0["frequencyZ"])
+            self.train_node0["accelerator_z"], self.convolveNode0["frequencyZ"])
+        self.fc.connectTerminals(
+            self.train_node1["accelerator_x"], self.convolveNode1["frequencyX"])
+        self.fc.connectTerminals(
+            self.train_node1["accelerator_y"], self.convolveNode1["frequencyY"])
+        self.fc.connectTerminals(
+            self.train_node1["accelerator_z"], self.convolveNode1["frequencyZ"])
+
+        # connect prediction nodes to accelerator values
         self.fc.connectTerminals(
             self.prediction_node0["accelerator_x"], self.convolveNode0["frequencyX"])
         self.fc.connectTerminals(

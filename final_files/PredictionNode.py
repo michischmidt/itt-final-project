@@ -5,7 +5,6 @@ import fluidsynth
 DATA_LENGTH = 30
 
 class PredictNode(Node):
-    counter = 0
     nodeName = "PredictNode"
     fs = fluidsynth.Synth(1)
     fs.start(driver='alsa')

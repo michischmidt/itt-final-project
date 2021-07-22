@@ -62,16 +62,16 @@ class DIPPIDNode(Node):
             'accelX': dict(io='out'),
             'accelY': dict(io='out'),
             'accelZ': dict(io='out'),
-            'button1': dict(io='out'),
-            'button2': dict(io='out'),
-            'button3': dict(io='out'),
+            # 'button1': dict(io='out'),
+            # 'button2': dict(io='out'),
+            # 'button3': dict(io='out'),
         }
 
         self.dippid = None
         self._acc_vals = []
-        self._btn1 = []
-        self._btn2 = []
-        self._btn3 = []
+        # self._btn1 = []
+        # self._btn2 = []
+        # self._btn3 = []
 
         # self._init_ui()
 
@@ -110,19 +110,19 @@ class DIPPIDNode(Node):
     def update_all_sensors(self):
         if self.dippid is None or not self.dippid.has_capability('accelerometer'):
             return
-        if self.dippid is None or not self.dippid.has_capability('button_1'):
-            return
-        if self.dippid is None or not self.dippid.has_capability('button_2'):
-            return
-        if self.dippid is None or not self.dippid.has_capability('button_3'):
-            return
+        # if self.dippid is None or not self.dippid.has_capability('button_1'):
+        #     return
+        # if self.dippid is None or not self.dippid.has_capability('button_2'):
+        #     return
+        # if self.dippid is None or not self.dippid.has_capability('button_3'):
+        #     return
 
         v = self.dippid.get_value('accelerometer')
         self._acc_vals = [v['x'], v['y'], v['z']]
 
-        self._btn1 = self.dippid.get_value('button_1')
-        self._btn2 = self.dippid.get_value('button_2')
-        self._btn3 = self.dippid.get_value('button_3')
+        # self._btn1 = self.dippid.get_value('button_1')
+        # self._btn2 = self.dippid.get_value('button_2')
+        # self._btn3 = self.dippid.get_value('button_3')
 
         self.update()
 
@@ -175,10 +175,7 @@ class DIPPIDNode(Node):
     def process(self, **kwdargs):
         return {'accelX': np.array([self._acc_vals[0]]),
                 'accelY': np.array([self._acc_vals[1]]),
-                'accelZ': np.array([self._acc_vals[2]]),
-                'button1': self._btn1,
-                'button2': self._btn2,
-                'button3': self._btn3}
+                'accelZ': np.array([self._acc_vals[2]])}
 
 
 fclib.registerNodeType(DIPPIDNode, [('Sensor',)])
