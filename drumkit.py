@@ -17,7 +17,6 @@ from sklearn import svm
 from numpy import fromstring
 import time
 import fluidsynth
-from FFTNode import FftNode
 from ConvolutionNode import ConvolveNode
 
 '''
@@ -86,7 +85,7 @@ class Drumkit(QMainWindow):
         self.prediction_node = self.fc.createNode(
             "PredictionNode", pos=(450, 150))
         # create FFT node
-        self.fft_node = self.fc.createNode("ConvolveNode", pos=(300, 100))
+        self.convolveNode = self.fc.createNode("ConvolveNode", pos=(300, 100))
 
         # init user input ui
         self.main_control_widget = QtWidgets.QWidget()
@@ -148,7 +147,7 @@ class Drumkit(QMainWindow):
             self.gesture_list_widget, 0, 1, 1, 1)
 
     def predict_button_press(self):
-        if self.fft_node.get_had_input_yet():
+        if self.convolveNode.get_had_input_yet():
             self.connection_error_label.setText("")
             if not self.is_predicting:
                 self.update_prediction_node_data()
@@ -176,7 +175,7 @@ class Drumkit(QMainWindow):
                 columns=['gestureName', 'frequenciesX', 'frequenciesY', 'frequenciesZ'])
 
     def train_button_press(self):
-        if self.fft_node.get_had_input_yet():
+        if self.convolveNode.get_had_input_yet():
             self.connection_error_label.setText("")
             self.training_timer.start(TIME_FOR_DATA)
             self.train_button.setText("Training!")
@@ -243,27 +242,27 @@ class Drumkit(QMainWindow):
         self.fc.connectTerminals(
             self.dippid_node["accelZ"], buffer_node_z["dataIn"])
 
-        # connect FFT node
+        # connect convolution node
         self.fc.connectTerminals(
-            buffer_node_x["dataOut"], self.fft_node["accelX"])
+            buffer_node_x["dataOut"], self.convolveNode["accelX"])
         self.fc.connectTerminals(
-            buffer_node_y["dataOut"], self.fft_node["accelY"])
+            buffer_node_y["dataOut"], self.convolveNode["accelY"])
         self.fc.connectTerminals(
-            buffer_node_z["dataOut"], self.fft_node["accelZ"])
+            buffer_node_z["dataOut"], self.convolveNode["accelZ"])
 
         # connect train node to accelerator values
         self.fc.connectTerminals(
-            self.train_node["accelerator_x"], self.fft_node["frequencyX"])
+            self.train_node["accelerator_x"], self.convolveNode["frequencyX"])
         self.fc.connectTerminals(
-            self.train_node["accelerator_y"], self.fft_node["frequencyY"])
+            self.train_node["accelerator_y"], self.convolveNode["frequencyY"])
         self.fc.connectTerminals(
-            self.train_node["accelerator_z"], self.fft_node["frequencyZ"])
+            self.train_node["accelerator_z"], self.convolveNode["frequencyZ"])
         self.fc.connectTerminals(
-            self.prediction_node["accelerator_x"], self.fft_node["frequencyX"])
+            self.prediction_node["accelerator_x"], self.convolveNode["frequencyX"])
         self.fc.connectTerminals(
-            self.prediction_node["accelerator_y"], self.fft_node["frequencyY"])
+            self.prediction_node["accelerator_y"], self.convolveNode["frequencyY"])
         self.fc.connectTerminals(
-            self.prediction_node["accelerator_z"], self.fft_node["frequencyZ"])
+            self.prediction_node["accelerator_z"], self.convolveNode["frequencyZ"])
 
 
 class PredictionNode(Node):
@@ -383,7 +382,6 @@ class TrainNode(Node):
 
 
 if __name__ == "__main__":
-    # fclib.registerNodeType(FftNode, [("FftNode",)])
     # fclib.registerNodeType(ConvolveNode, [("ConvolveNode",)])
     fclib.registerNodeType(TrainNode, [("TrainNode",)])
     fclib.registerNodeType(PredictionNode, [("PredictionNode",)])
