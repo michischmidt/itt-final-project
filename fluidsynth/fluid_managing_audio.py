@@ -16,20 +16,20 @@ fl = fluidsynth.Synth()
 
 # Initial silence is 1 second
 s = numpy.append(s, fl.get_samples(44100 * 1))
-
+fl.start(driver='alsa')
 sfid = fl.sfload('./pns_drum.sf2')
 fl.program_select(0, sfid, 0, 0)
 
 fl.noteon(0, 35, 100)
-fl.noteon(0, 38, 100)
-fl.noteon(0, 46, 100)
+# fl.noteon(0, 38, 100)
+# fl.noteon(0, 46, 100)
 
 # Chord is held for 2 seconds
-s = numpy.append(s, fl.get_samples(44100 * 1))
+s = numpy.append(s, fl.get_samples(44100 * 3))
 
 fl.noteon(0, 35, 100)
-fl.noteon(0, 38, 100)
-fl.noteon(0, 46, 100)
+# fl.noteon(0, 38, 100)
+# fl.noteon(0, 46, 100)
 
 # Decay of chord is held for 1 second
 s = numpy.append(s, fl.get_samples(44100 * 1))
