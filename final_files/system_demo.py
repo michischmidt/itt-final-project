@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# coding: utf-8
+# -*- coding: utf-8 -*-
+# Script was written by Erik Blank and Michael Schmidt
+
 import sys
 from PyQt5 import uic, QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QMainWindow
@@ -20,6 +25,8 @@ TRAINING_DATA_FILE = "training_data.csv"
 # to calculate to time per gesture do:
 # DATA_LENGTH / (DippidFrequency * 2)
 DATA_LENGTH = 30
+
+# 30 sec training time per gesture
 TIME_FOR_DATA = 30000
 
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 # -*- coding: utf-8 -*-
+# Script was rewritten by Erik Blank and Michael Schmidt
 
 from pyqtgraph.flowchart import Flowchart, Node
 from pyqtgraph.flowchart.library.common import CtrlNode
