@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# coding: utf-8
+# -*- coding: utf-8 -*-
+# Script was rewritten by Erik Blank and Michael Schmidt
+
 import pyaudio
 import os
 import wave

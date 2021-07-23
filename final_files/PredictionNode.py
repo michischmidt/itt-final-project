@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# coding: utf-8
+# -*- coding: utf-8 -*-
+# Script was written by Erik Blank and Michael Schmidt
+
 import numpy
 from pyqtgraph.flowchart import Node
 from sklearn import svm
