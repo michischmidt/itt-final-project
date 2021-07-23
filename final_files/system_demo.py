@@ -69,7 +69,6 @@ class Drumkit(QtWidgets.QMainWindow):
         self.current_training_data_dict = {}
         self.connectButtons()
 
-    # TODO: Convert btn string 1/0 into int before intilizing self.dippid0_btn
     def initUI(self):
         # create DIPPID nodes
         central_widget = QtGui.QWidget()
@@ -105,10 +104,10 @@ class Drumkit(QtWidgets.QMainWindow):
             cb.addItems(self.DRUMS)
 
         # put labels for device-buttons in a list to highlight later
-        self.device1_btn_labels = []
-        self.device1_btn_labels.append(self.ui.label_btnDevice1_1)
-        self.device1_btn_labels.append(self.ui.label_btnDevice1_2)
-        self.device1_btn_labels.append(self.ui.label_btnDevice1_3)
+        self.device0_btn_labels = []
+        self.device0_btn_labels.append(self.ui.label_btnDevice1_1)
+        self.device0_btn_labels.append(self.ui.label_btnDevice1_2)
+        self.device0_btn_labels.append(self.ui.label_btnDevice1_3)
 
         self.device2_btn_labels = []
         self.device2_btn_labels.append(self.ui.label_btnDevice2_1)
@@ -164,8 +163,8 @@ class Drumkit(QtWidgets.QMainWindow):
         self.btnConnect0.setDisabled(True)
 
     def __connectDevice2(self):
-        port = int(self.ui.lineEditPort0.text())
-        hz = int(self.ui.lineEditConnect0.text())
+        port = int(self.ui.lineEditPort1.text())
+        hz = int(self.ui.lineEditConnect1.text())
         print(f'connect device 2 with {hz}hz')
         self.dippid_node1.connect_device(port, hz)
         self.btnConnect1.setText("Connected")
@@ -297,19 +296,19 @@ class Drumkit(QtWidgets.QMainWindow):
     def handle_btns_device1(self, btns):
         if (btns["button1"] == 1):
             self.current_btn_device1 = 1
-            self.current_drum_device0 = self.DRUMS[self.comboBox_2_1.currentText(
+            self.current_drum_device1 = self.DRUMS[self.comboBox_2_1.currentText(
             )]
             self.unhighlight_labels(1)
             self.highlight_labels(1, 1)
         elif (btns["button2"] == 1):
             self.current_btn_device1 = 2
-            self.current_drum_device0 = self.DRUMS[self.comboBox_2_2.currentText(
+            self.current_drum_device1 = self.DRUMS[self.comboBox_2_2.currentText(
             )]
             self.unhighlight_labels(1)
             self.highlight_labels(1, 2)
         elif (btns["button3"] == 1):
             self.current_btn_device1 = 3
-            self.current_drum_device0 = self.DRUMS[self.comboBox_2_3.currentText(
+            self.current_drum_device1 = self.DRUMS[self.comboBox_2_3.currentText(
             )]
             self.unhighlight_labels(1)
             self.highlight_labels(1, 3)
@@ -418,24 +417,18 @@ class Drumkit(QtWidgets.QMainWindow):
 
     # highlight labels if button is active
     def highlight_labels(self, device_num, btn_num):
-        # set background of all labels to transparent
-        for label in self.device1_btn_labels:
-            label.setStyleSheet("background-color: transparent")
-        for label in self.device2_btn_labels:
-            label.setStyleSheet("background-color: transparent")
-
         # hightlight label
         if device_num == 0:
-            self.device1_btn_labels[btn_num -
+            self.device0_btn_labels[btn_num -
                                     1].setStyleSheet("background-color: lightgreen")
         elif device_num == 1:
-            self.device1_btn_labels[btn_num -
+            self.device2_btn_labels[btn_num -
                                     1].setStyleSheet("background-color: lightgreen")
 
     def unhighlight_labels(self, device_num):
         # set background of all labels to transparent
         if device_num == 0:
-            for label in self.device1_btn_labels:
+            for label in self.device0_btn_labels:
                 label.setStyleSheet("background-color: transparent")
         elif device_num == 1:
             for label in self.device2_btn_labels:
