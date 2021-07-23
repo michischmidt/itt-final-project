@@ -172,11 +172,20 @@ class Drumkit(QtWidgets.QMainWindow):
 
     # TODO: implement method
     def __start_record(self):
-        print("start record")
+        if self.is_predicting0:
+            self.prediction_node0.start_recording()
+        if self.is_predicting1:
+            self.prediction_node1.start_recording()
 
     # TODO: implement method
     def __stop_record(self):
-        print("start record")
+        if self.is_predicting0:
+            self.prediction_node0.stop_recording()
+        if self.is_predicting1:
+            self.prediction_node1.stop_recording()
+        self.recorder.add_record(self.prediction_node0.get_recording())
+        self.ui.listRecordings.clear()
+        self.ui.listRecordings.addItems(self.recorder.get_audios())
 
     def __play_selected(self):
         index = self.ui.listRecordings.currentRow()
@@ -249,10 +258,12 @@ class Drumkit(QtWidgets.QMainWindow):
                 self.prediction_timer0.start(400)
                 self.is_predicting0 = True
                 self.btnStartPrediction0.setText("Stop Playing.")
+                self.highlight_labels(0,1)
             else:
                 self.prediction_timer0.stop()
                 self.is_predicting0 = False
                 self.btnStartPrediction0.setText("Start Playing! (Device 1)")
+                self.unhighlight_labels(0)
         else:
             self.errorLabel0.setText(
                 "Err! Connect Device first.")
@@ -265,10 +276,12 @@ class Drumkit(QtWidgets.QMainWindow):
                 self.prediction_timer1.start(400)
                 self.is_predicting1 = True
                 self.btnStartPrediction1.setText("Stop Playing.")
+                self.highlight_labels(1,1)
             else:
                 self.prediction_timer1.stop()
                 self.is_predicting1 = False
                 self.btnStartPrediction1.setText("Start Playing! (Device 2)")
+                self.unhighlight_labels(1)
         else:
             self.errorLabel1.setText(
                 "Err! Connect Device first.")

@@ -1,6 +1,8 @@
+import numpy
 from pyqtgraph.flowchart import Node
 from sklearn import svm
 import fluidsynth
+import time
 
 DATA_LENGTH = 30
 
@@ -11,6 +13,7 @@ class PredictNode(Node):
     sfid = fs.sfload('./pns_drum.sf2')
     # select MIDI track, sound font, MIDI bank and preset
     fs.program_select(0, sfid, 0, 0)
+    is_recording = False
 
     def __init__(self, name):
         Node.__init__(self, name, terminals={
@@ -24,6 +27,8 @@ class PredictNode(Node):
         self.current_gesture_z_frequencies = []
         self.current_prediction = "None"
         self.training_data_dict = {}
+        self.recording = []
+        self.time = time.time()
 
     def init_svm_with_data(self, data):
         print("initsvm with data")
@@ -70,6 +75,10 @@ class PredictNode(Node):
         if (result > 0):
             self.fs.noteon(0, drumNumber, 100)
             self.fs.noteoff(0, drumNumber)
+            if self.is_recording:
+                dur = time.time() - self.time
+                self.recording = numpy.append(self.recording, self.fs.get_samples(int(44100 * dur)))
+                self.time = time.time()
 
     def get_prediction(self, drumNumber):
         input_data = []
@@ -80,6 +89,21 @@ class PredictNode(Node):
         result = self.classifier.predict(predicition_data)[0]
         self.make_sound(result, drumNumber)
         return list(self.training_data_dict.keys())[result]
+
+    def start_recording(self):
+        self.is_recording = True
+        self.time = time.time()
+        print("start recording")
+
+    def stop_recording(self):
+        self.is_recording = False
+        print("stop recording")
+
+    def get_recording(self):
+        result = fluidsynth.raw_audio_string(self.recording)
+        self.recording = []
+        return result
+        
 
     def process(self, **kwds):
         # Get the last values from our accelerator data
