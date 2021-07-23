@@ -648,13 +648,6 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_add_audio">
-           <property name="text">
-            <string>add audio (nur zum testen)</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="btn_undo">
            <property name="text">
             <string>Undo</string>

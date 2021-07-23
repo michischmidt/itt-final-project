@@ -146,7 +146,6 @@ class Drumkit(QtWidgets.QMainWindow):
         self.ui.btn_delete_all.clicked.connect(lambda x: self.__remove_all())
         self.ui.btn_undo.clicked.connect(lambda x: self.__undo())
         self.ui.btn_export.clicked.connect(lambda x: self.__export())
-        self.ui.btn_add_audio.clicked.connect(lambda x: self.__add_audio())
 
         # buttons to start playing each device
         self.ui.btnStartPrediction0.clicked.connect(
@@ -170,11 +169,9 @@ class Drumkit(QtWidgets.QMainWindow):
         self.btnConnect1.setText("Connected")
         self.btnConnect1.setDisabled(True)
 
-    # TODO: implement method
     def __start_record(self):
         self.prediction_node0.start_recording()
 
-    # TODO: implement method
     def __stop_record(self):
         self.prediction_node0.stop_recording()
         self.recorder.add_record(self.prediction_node0.get_recording())
@@ -208,41 +205,8 @@ class Drumkit(QtWidgets.QMainWindow):
         self.ui.listRecordings.clear()
         self.ui.listRecordings.addItems(self.recorder.get_audios())
 
-    # TODO: implement method
     def __export(self):
         self.recorder.export_record()
-
-    # TODO: delete this method, its just for testing
-    def __add_audio(self):
-        s = []
-        fl = fluidsynth.Synth()
-
-        # Initial silence is 1 second
-        s = numpy.append(s, fl.get_samples(44100 * 1))
-        fl.start(driver='alsa')
-        sfid = fl.sfload('./pns_drum.sf2')
-        fl.program_select(0, sfid, 0, 0)
-
-        fl.noteon(0, 35, 100)
-
-        # Chord is held for 2 seconds
-        for i in range(8):
-            s = numpy.append(s, fl.get_samples(int(44100 * 0.1)))
-            fl.noteon(0, 38, 100)
-            fl.noteon(0, 46, 100)
-
-        # Chord is held for 2 seconds
-        s = numpy.append(s, fl.get_samples(44100 * 1))
-
-        fl.noteon(0, 46, 100)
-
-        # Decay of chord is held for 1 second
-        s = numpy.append(s, fl.get_samples(44100 * 1))
-
-        fl.delete()
-
-        self.recorder.add_record(fluidsynth.raw_audio_string(s))
-        self.ui.listRecordings.addItem(self.recorder.get_audios()[-1])
 
     def predict_button_press_device0(self):
         if self.convolveNode0.get_had_input_yet():
