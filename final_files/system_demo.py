@@ -50,12 +50,11 @@ class Drumkit(QtWidgets.QMainWindow):
         super(Drumkit, self).__init__()
         self.comboboxes_device1 = []
         self.comboboxes_device2 = []
-        self.dippid0_btn1 = 1
-        self.dippid0_btn2 = 0
-        self.dippid0_btn3 = 0
-        self.dippid1_btn1 = 1
-        self.dippid1_btn2 = 0
-        self.dippid1_btn3 = 0
+        # button 1, 2, 3 for each device
+        self.current_btn_device0 = 0
+        self.current_drum_device0 = 35
+        self.current_btn_device1 = 0
+        self.current_drum_device1 = 35
         self.recorder = RecordAudio()
         self.initUI()
         self.init_logger(TRAINING_DATA_FILE)
@@ -70,7 +69,6 @@ class Drumkit(QtWidgets.QMainWindow):
         self.current_training_data_dict = {}
         self.connectButtons()
 
-    # TODO: Give port from UI
     # TODO: Convert btn string 1/0 into int before intilizing self.dippid0_btn
     def initUI(self):
         # create DIPPID nodes
@@ -276,11 +274,53 @@ class Drumkit(QtWidgets.QMainWindow):
             self.errorLabel1.setText(
                 "Err! Connect Device first.")
 
+    def handle_btns_device0(self, btns):
+        if (btns["button1"] == 1):
+            self.current_btn_device0 = 1
+            self.current_drum_device0 = self.DRUMS[self.comboBox_1_1.currentText(
+            )]
+            self.unhighlight_labels(0)
+            self.highlight_labels(0, 1)
+        elif (btns["button2"] == 1):
+            self.current_btn_device0 = 2
+            self.current_drum_device0 = self.DRUMS[self.comboBox_1_2.currentText(
+            )]
+            self.unhighlight_labels(0)
+            self.highlight_labels(0, 2)
+        elif (btns["button3"] == 1):
+            self.current_btn_device0 = 3
+            self.current_drum_device0 = self.DRUMS[self.comboBox_1_3.currentText(
+            )]
+            self.unhighlight_labels(0)
+            self.highlight_labels(0, 3)
+
+    def handle_btns_device1(self, btns):
+        if (btns["button1"] == 1):
+            self.current_btn_device1 = 1
+            self.current_drum_device0 = self.DRUMS[self.comboBox_2_1.currentText(
+            )]
+            self.unhighlight_labels(1)
+            self.highlight_labels(1, 1)
+        elif (btns["button2"] == 1):
+            self.current_btn_device1 = 2
+            self.current_drum_device0 = self.DRUMS[self.comboBox_2_2.currentText(
+            )]
+            self.unhighlight_labels(1)
+            self.highlight_labels(1, 2)
+        elif (btns["button3"] == 1):
+            self.current_btn_device1 = 3
+            self.current_drum_device0 = self.DRUMS[self.comboBox_2_3.currentText(
+            )]
+            self.unhighlight_labels(1)
+            self.highlight_labels(1, 3)
+
     def update_prediction_device0(self):
-        self.prediction_node0.get_prediction()
+        self.handle_btns_device0(self.dippid_node0.get_btns())
+        self.prediction_node0.get_prediction(self.current_drum_device0)
 
     def update_prediction_device1(self):
-        self.prediction_node1.get_prediction()
+        self.handle_btns_device1(self.dippid_node1.get_btns())
+        self.prediction_node1.get_prediction(self.current_drum_device1)
 
     def init_logger(self, filename):
         self.current_filename = filename
@@ -385,19 +425,21 @@ class Drumkit(QtWidgets.QMainWindow):
             label.setStyleSheet("background-color: transparent")
 
         # hightlight label
-        if device_num == 1:
+        if device_num == 0:
             self.device1_btn_labels[btn_num -
                                     1].setStyleSheet("background-color: lightgreen")
-        elif device_num == 2:
+        elif device_num == 1:
             self.device1_btn_labels[btn_num -
                                     1].setStyleSheet("background-color: lightgreen")
 
-    def unhighlight_labels(self):
+    def unhighlight_labels(self, device_num):
         # set background of all labels to transparent
-        for label in self.device1_btn_labels:
-            label.setStyleSheet("background-color: transparent")
-        for label in self.device2_btn_labels:
-            label.setStyleSheet("background-color: transparent")
+        if device_num == 0:
+            for label in self.device1_btn_labels:
+                label.setStyleSheet("background-color: transparent")
+        elif device_num == 1:
+            for label in self.device2_btn_labels:
+                label.setStyleSheet("background-color: transparent")
 
 
 fclib.registerNodeType(ConvolveNode, [("ConvolveNode",)])

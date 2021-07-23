@@ -66,19 +66,19 @@ class PredictNode(Node):
         return [svm_data_array]
 
     # testing sound accuracy
-    def make_sound(self, result):
+    def make_sound(self, result, drumNumber):
         if (result > 0):
-            self.fs.noteon(0, 35, 100)
-            self.fs.noteoff(0, 35)
+            self.fs.noteon(0, drumNumber, 100)
+            self.fs.noteoff(0, drumNumber)
 
-    def get_prediction(self):
+    def get_prediction(self, drumNumber):
         input_data = []
         input_data.append(self.current_gesture_x_frequencies)
         input_data.append(self.current_gesture_y_frequencies)
         input_data.append(self.current_gesture_z_frequencies)
         predicition_data = self.get_svm_data_array(input_data)
         result = self.classifier.predict(predicition_data)[0]
-        self.make_sound(result)
+        self.make_sound(result, drumNumber)
         return list(self.training_data_dict.keys())[result]
 
     def process(self, **kwds):

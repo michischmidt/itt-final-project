@@ -63,67 +63,37 @@ class DIPPIDNode(Node):
             'accelX': dict(io='out'),
             'accelY': dict(io='out'),
             'accelZ': dict(io='out'),
-            # 'button1': dict(io='out'),
-            # 'button2': dict(io='out'),
-            # 'button3': dict(io='out'),
         }
 
         self.dippid = None
         self._acc_vals = []
-        # self._btn1 = []
-        # self._btn2 = []
-        # self._btn3 = []
-
-        # self._init_ui()
+        self._btns = {
+            "button1": 0,
+            "button2": 0,
+            "button3": 0
+        }
 
         self.update_timer = QtCore.QTimer()
         self.update_timer.timeout.connect(self.update_all_sensors)
 
         Node.__init__(self, name, terminals=terminals)
 
-    # def _init_ui(self):
-    #     self.ui = QtGui.QWidget()
-    #     self.layout = QtGui.QGridLayout()
-
-    #     label = QtGui.QLabel("Port, BTADDR or TTY:")
-    #     self.layout.addWidget(label)
-
-    #     self.text = QtGui.QLineEdit()
-    #     self.addr = "5700"
-    #     self.text.setText(self.addr)
-    #     self.layout.addWidget(self.text)
-
-    #     label2 = QtGui.QLabel("Update rate (Hz)")
-    #     self.layout.addWidget(label2)
-
-    #     self.update_rate_input = QtGui.QSpinBox()
-    #     self.update_rate_input.setMinimum(0)
-    #     self.update_rate_input.setMaximum(60)
-    #     self.update_rate_input.setValue(30)
-    #     self.update_rate_input.valueChanged.connect(self.set_update_rate)
-    #     self.layout.addWidget(self.update_rate_input)
-
-    #     self.connect_button = QtGui.QPushButton("connect")
-    #     self.connect_button.clicked.connect(self.connect_device)
-    #     self.layout.addWidget(self.connect_button)
-    #     self.ui.setLayout(self.layout)
-
     def update_all_sensors(self):
         if self.dippid is None or not self.dippid.has_capability('accelerometer'):
             return
-        # if self.dippid is None or not self.dippid.has_capability('button_1'):
-        #     return
-        # if self.dippid is None or not self.dippid.has_capability('button_2'):
-        #     return
-        # if self.dippid is None or not self.dippid.has_capability('button_3'):
-        #     return
+        if self.dippid is None or not self.dippid.has_capability('button_1'):
+            return
+        if self.dippid is None or not self.dippid.has_capability('button_2'):
+            return
+        if self.dippid is None or not self.dippid.has_capability('button_3'):
+            return
 
         v = self.dippid.get_value('accelerometer')
         self._acc_vals = [v['x'], v['y'], v['z']]
 
-        # self._btn1 = self.dippid.get_value('button_1')
-        # self._btn2 = self.dippid.get_value('button_2')
-        # self._btn3 = self.dippid.get_value('button_3')
+        self._btns["button1"] = int(self.dippid.get_value('button_1'))
+        self._btns["button2"] = int(self.dippid.get_value('button_2'))
+        self._btns["button3"] = int(self.dippid.get_value('button_3'))
 
         self.update()
 
@@ -134,15 +104,8 @@ class DIPPIDNode(Node):
         self._acc_vals = [acc_vals['x'], acc_vals['y'], acc_vals['z']]
         self.update()
 
-    # def ctrlWidget(self):
-    #     return self.ui
-
     def connect_device(self, port, hz):
-        # if self.connect_button.text() != "connect" and self.connect_button.text() != "try again":
-        #     return
-
         address = str(port)
-        # self.connect_button.setText("connecting...")
 
         if '/dev/tty' in address:  # serial tty
             self.dippid = SensorSerial(address)
@@ -158,9 +121,7 @@ class DIPPIDNode(Node):
             print("try again")
             return
 
-        # self.connect_button.setText("connected")
         self.set_update_rate(hz)
-        # self.connect_button.setEnabled(False)
 
     def set_update_rate(self, rate):
         if self.dippid is None:
@@ -173,6 +134,9 @@ class DIPPIDNode(Node):
         else:
             self.update_timer.start(int(1000 / rate))
 
+    def get_btns(self):
+        return self._btns
+
     def process(self, **kwdargs):
         return {'accelX': np.array([self._acc_vals[0]]),
                 'accelY': np.array([self._acc_vals[1]]),
@@ -182,7 +146,7 @@ class DIPPIDNode(Node):
 fclib.registerNodeType(DIPPIDNode, [('Sensor',)])
 fclib.registerNodeType(FftNode, [("FftNode",)])
 
-
+# Following functions are for singnal prcoessing visualization
 def xPlot(fc, node, dippidNode, xPos):
     pw1 = pg.PlotWidget()
     layout.addWidget(pw1, xPos, 1)
