@@ -172,17 +172,11 @@ class Drumkit(QtWidgets.QMainWindow):
 
     # TODO: implement method
     def __start_record(self):
-        if self.is_predicting0:
-            self.prediction_node0.start_recording()
-        if self.is_predicting1:
-            self.prediction_node1.start_recording()
+        self.prediction_node0.start_recording()
 
     # TODO: implement method
     def __stop_record(self):
-        if self.is_predicting0:
-            self.prediction_node0.stop_recording()
-        if self.is_predicting1:
-            self.prediction_node1.stop_recording()
+        self.prediction_node0.stop_recording()
         self.recorder.add_record(self.prediction_node0.get_recording())
         self.ui.listRecordings.clear()
         self.ui.listRecordings.addItems(self.recorder.get_audios())
