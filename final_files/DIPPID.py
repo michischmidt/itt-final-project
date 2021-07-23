@@ -11,6 +11,7 @@ import signal
 #import serial
 #import wiimote
 
+
 class Sensor():
     # class variable that stores all instances of Sensor
     instances = []
@@ -101,6 +102,8 @@ class Sensor():
 # initialized with a UDP port
 # listens to all IPs by default
 # requires the socket module
+
+
 class SensorUDP(Sensor):
     def __init__(self, port, ip='0.0.0.0'):
         Sensor.__init__(self)
@@ -130,6 +133,8 @@ class SensorUDP(Sensor):
 # initialized with a path to a TTY (e.g. /dev/ttyUSB0)
 # default baudrate is 115200
 # requires pyserial
+
+
 class SensorSerial(Sensor):
     def __init__(self, tty, baudrate=115200):
         Sensor.__init__(self)
@@ -163,6 +168,8 @@ class SensorSerial(Sensor):
 # initialized with a Bluetooth address
 # requires wiimote.py (https://github.com/RaphaelWimmer/wiimote.py)
 # and pybluez
+
+
 class SensorWiimote(Sensor):
     def __init__(self, btaddr):
         Sensor.__init__(self)
@@ -193,7 +200,7 @@ class SensorWiimote(Sensor):
 
     def _update(self, key, value):
         self._add_capability(key)
-        
+
         # do not notify callbacks on initialization
         if self._data[key] == []:
             self._data[key] = value
@@ -205,9 +212,12 @@ class SensorWiimote(Sensor):
             self._notify_callbacks(key)
 
 # close the program softly when ctrl+c is pressed
+
+
 def handle_interrupt_signal(signal, frame):
     for sensor in Sensor.instances:
         sensor.disconnect()
     sys.exit(0)
+
 
 signal.signal(signal.SIGINT, handle_interrupt_signal)

@@ -27,18 +27,18 @@ class ConvolveNode(Node):
         self.current_data_y = []
         self.current_data_z = []
 
+    # Kernel taken from https://danielmuellerkomorowska.com/
+    # 2020/06/02/smoothing-data-by-rolling-average-with-numpy/
     def convolve_signal(self, data):
         try:
-            # kernel_avg = np.zeros(101)
-            # for i in range(47,53):
-            #     kernel_avg[i] = 1.0 / 6
             while len(data) > DATA_LENGTH:
                 data = data[1:]
             n = len(data)
             kernel_size = 10
             kernel_avg = np.ones(kernel_size) / kernel_size
-            
-            frequenzy = np.abs(np.convolve(data, kernel_avg, mode="same"))[0:int(n)]
+
+            frequenzy = np.abs(np.convolve(
+                data, kernel_avg, mode="same"))[0:int(n)]
             # tolist() to convert from np.ndarray
             return frequenzy.tolist()
         except Exception as e:

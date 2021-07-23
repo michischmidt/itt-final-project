@@ -17,8 +17,8 @@ from ConvolutionNode import ConvolveNode
 
 class BufferNode(Node):
     """
-    Buffers the last n samples provided on input and provides them as a list of
-    length n on output.
+    Buffers the last n samples provided on input and provides
+    them as a list of length n on output.
     A spinbox widget allows for setting the size of the buffer.
     Default size is 32 samples.
     """
@@ -147,6 +147,8 @@ fclib.registerNodeType(DIPPIDNode, [('Sensor',)])
 fclib.registerNodeType(FftNode, [("FftNode",)])
 
 # Following functions are for singnal prcoessing visualization
+
+
 def xPlot(fc, node, dippidNode, xPos):
     pw1 = pg.PlotWidget()
     layout.addWidget(pw1, xPos, 1)
@@ -236,12 +238,12 @@ if __name__ == '__main__':
     dippidNode = fc.createNode("DIPPID", pos=(0, 0))
     fftNode = fc.createNode("FftNode", pos=(0, 150))
     convolveNode = fc.createNode("ConvolveNode", pos=(0, 300))
-    xPlot(fc, fftNode, dippidNode, 0)
-    yPlot(fc, fftNode, dippidNode, 1)
-    zPlot(fc, fftNode, dippidNode, 2)
-    xPlot(fc, convolveNode, dippidNode, 3)
-    yPlot(fc, convolveNode, dippidNode, 4)
-    zPlot(fc, convolveNode, dippidNode, 5)
+    # xPlot(fc, fftNode, dippidNode, 0)
+    # yPlot(fc, fftNode, dippidNode, 1)
+    # zPlot(fc, fftNode, dippidNode, 2)
+    xPlot(fc, convolveNode, dippidNode, 0)
+    yPlot(fc, convolveNode, dippidNode, 1)
+    zPlot(fc, convolveNode, dippidNode, 2)
 
     win.show()
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
