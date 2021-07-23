@@ -34,9 +34,20 @@ TIME_FOR_DATA = 30000
 
 
 class Drumkit(QtWidgets.QMainWindow):
+
+    DRUMS = {
+        "Bass/Kick drum": 35,
+        "Snare drum": 38,
+        "Hi-hat Cymbal": 46,
+        "Crash Cymbal": 49,
+        "Tom drum 1": 45,
+        "Tom drum 2": 50,
+        "Ride Cymbal": 51,
+        "Floor Tom drum": 41
+    }
+
     def __init__(self):
         super(Drumkit, self).__init__()
-        self.drums = ["drum1", "drum2", "drum3"]
         self.comboboxes_device1 = []
         self.comboboxes_device2 = []
         self.dippid0_btn1 = 1
@@ -92,10 +103,10 @@ class Drumkit(QtWidgets.QMainWindow):
         self.comboboxes_device2.append(self.ui.comboBox_2_2)
         self.comboboxes_device2.append(self.ui.comboBox_2_3)
         for cb in self.comboboxes_device1:
-            cb.addItems(self.drums)
+            cb.addItems(self.DRUMS)
 
         for cb in self.comboboxes_device2:
-            cb.addItems(self.drums)
+            cb.addItems(self.DRUMS)
 
         # put labels for device-buttons in a list to highlight later
         self.device1_btn_labels = []
