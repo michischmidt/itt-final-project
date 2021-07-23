@@ -71,8 +71,6 @@ class Drumkit(QtWidgets.QMainWindow):
         self.connectButtons()
 
     # TODO: Give port from UI
-    # TODO: Disable connect buttons after connected (siehe DIPPID_pyqtnode)
-    # TODO: Connect buttons properly
     # TODO: Convert btn string 1/0 into int before intilizing self.dippid0_btn
     def initUI(self):
         # create DIPPID nodes
@@ -92,7 +90,7 @@ class Drumkit(QtWidgets.QMainWindow):
         self.dippid_node1 = self.fc.createNode("DIPPID", pos=(0, 150))
 
         self.ui = uic.loadUi("user_interface.ui", self)
-        self.setWindowTitle("Drumkit")
+        self.setWindowTitle("Drumkit Demo")
 
         # set items for the comboboxes
         self.comboboxes_device1.append(self.ui.comboBox_1_1)
@@ -140,11 +138,14 @@ class Drumkit(QtWidgets.QMainWindow):
         self.ui.btnConnect1.clicked.connect(lambda x: self.__connectDevice2())
 
         # buttons for audio section
-        self.ui.btn_start_record.clicked.connect(lambda x: self.__start_record())
+        self.ui.btn_start_record.clicked.connect(
+            lambda x: self.__start_record())
         self.ui.btn_stop_record.clicked.connect(lambda x: self.__stop_record())
-        self.ui.btn_play_selected.clicked.connect(lambda x: self.__play_selected())
+        self.ui.btn_play_selected.clicked.connect(
+            lambda x: self.__play_selected())
         self.ui.btn_play_all.clicked.connect(lambda x: self.__play_all())
-        self.ui.btn_delete_selected.clicked.connect(lambda x: self.__remove_selected())
+        self.ui.btn_delete_selected.clicked.connect(
+            lambda x: self.__remove_selected())
         self.ui.btn_delete_all.clicked.connect(lambda x: self.__remove_all())
         self.ui.btn_undo.clicked.connect(lambda x: self.__undo())
         self.ui.btn_export.clicked.connect(lambda x: self.__export())
@@ -157,16 +158,18 @@ class Drumkit(QtWidgets.QMainWindow):
             lambda x: self.predict_button_press_device1())
 
     def __connectDevice1(self):
-        hz_device_1 = self.ui.lineEditConnect1.text()
-        print(f'connect device 1 with {hz_device_1}hz')
-        self.dippid_node0.connect_device(5700, 30)
+        port = int(self.ui.lineEditPort0.text())
+        hz = int(self.ui.lineEditConnect0.text())
+        print(f'connect device 1 with {hz}hz')
+        self.dippid_node0.connect_device(port, hz)
         self.btnConnect0.setText("Connected")
         self.btnConnect0.setDisabled(True)
 
     def __connectDevice2(self):
-        hz_device_2 = self.ui.lineEditConnect2.text()
-        print(f'connect device 2 with {hz_device_2}hz')
-        self.dippid_node1.connect_device(5701, 30)
+        port = int(self.ui.lineEditPort0.text())
+        hz = int(self.ui.lineEditConnect0.text())
+        print(f'connect device 2 with {hz}hz')
+        self.dippid_node1.connect_device(port, hz)
         self.btnConnect1.setText("Connected")
         self.btnConnect1.setDisabled(True)
 
@@ -240,8 +243,6 @@ class Drumkit(QtWidgets.QMainWindow):
 
         self.recorder.add_record(fluidsynth.raw_audio_string(s))
         self.ui.listRecordings.addItem(self.recorder.get_audios()[-1])
-        
-
 
     def predict_button_press_device0(self):
         if self.convolveNode0.get_had_input_yet():
