@@ -76,16 +76,20 @@ class Drumkit(QMainWindow):
         layout.addWidget(self.fc.widget())
 
         # create DIPPID node
-        self.dippid_node = self.fc.createNode("DIPPID", pos=(0, 0))
+        self.dippid_node0 = self.fc.createNode("DIPPID", pos=(0, 0))
+        self.dippid_node1 = self.fc.createNode("DIPPID", pos=(0, 150))
 
         # create Train node
         self.train_node = self.fc.createNode("TrainNode", pos=(450, 150))
 
         # create Prediction node
-        self.prediction_node = self.fc.createNode(
+        self.prediction_node0 = self.fc.createNode(
             "PredictionNode", pos=(450, 150))
+        self.prediction_node1 = self.fc.createNode(
+            "PredictionNode", pos=(450, 300))
         # create FFT node
-        self.convolveNode = self.fc.createNode("ConvolveNode", pos=(300, 100))
+        self.convolveNode0 = self.fc.createNode("ConvolveNode", pos=(300, 150))
+        self.convolveNode1 = self.fc.createNode("ConvolveNode", pos=(300, 300))
 
         # init user input ui
         self.main_control_widget = QtWidgets.QWidget()
@@ -147,7 +151,7 @@ class Drumkit(QMainWindow):
             self.gesture_list_widget, 0, 1, 1, 1)
 
     def predict_button_press(self):
-        if self.convolveNode.get_had_input_yet():
+        if self.convolveNode0.get_had_input_yet():
             self.connection_error_label.setText("")
             if not self.is_predicting:
                 self.update_prediction_node_data()
@@ -164,7 +168,7 @@ class Drumkit(QMainWindow):
 
     def update_prediction(self):
         self.predict_label.setText(
-            f"Gesture: {self.prediction_node.get_prediction()}")
+            f"Gesture: {self.prediction_node0.get_prediction()} + {self.prediction_node1.get_prediction()}")
 
     def init_logger(self, filename):
         self.current_filename = filename
@@ -175,7 +179,7 @@ class Drumkit(QMainWindow):
                 columns=['gestureName', 'frequenciesX', 'frequenciesY', 'frequenciesZ'])
 
     def train_button_press(self):
-        if self.convolveNode.get_had_input_yet():
+        if self.convolveNode0.get_had_input_yet():
             self.connection_error_label.setText("")
             self.training_timer.start(TIME_FOR_DATA)
             self.train_button.setText("Training!")
@@ -225,44 +229,66 @@ class Drumkit(QMainWindow):
             gesture_z_frequencies = fromstring(row[3], sep="|")
             self.current_training_data_dict[gesture_name] = {
                 "x": gesture_x_frequencies, "y": gesture_y_frequencies, "z": gesture_z_frequencies}
-        self.prediction_node.init_svm_with_data(
+        self.prediction_node0.init_svm_with_data(
             self.current_training_data_dict)
 
     def init_nodes(self):
         # create buffer nodes
-        buffer_node_x = self.fc.createNode("Buffer", pos=(150, 0))
-        buffer_node_y = self.fc.createNode("Buffer", pos=(150, 100))
-        buffer_node_z = self.fc.createNode("Buffer", pos=(150, 200))
+        buffer_node_x0 = self.fc.createNode("Buffer", pos=(150, 0))
+        buffer_node_y0 = self.fc.createNode("Buffer", pos=(150, 150))
+        buffer_node_z0 = self.fc.createNode("Buffer", pos=(150, 300))
+
+        buffer_node_x1 = self.fc.createNode("Buffer", pos=(150, 450))
+        buffer_node_y1 = self.fc.createNode("Buffer", pos=(150, 600))
+        buffer_node_z1 = self.fc.createNode("Buffer", pos=(150, 750))
 
         # connect buffer nodes
         self.fc.connectTerminals(
-            self.dippid_node["accelX"], buffer_node_x["dataIn"])
+            self.dippid_node0["accelX"], buffer_node_x0["dataIn"])
         self.fc.connectTerminals(
-            self.dippid_node["accelY"], buffer_node_y["dataIn"])
+            self.dippid_node0["accelY"], buffer_node_y0["dataIn"])
         self.fc.connectTerminals(
-            self.dippid_node["accelZ"], buffer_node_z["dataIn"])
+            self.dippid_node0["accelZ"], buffer_node_z0["dataIn"])
+        self.fc.connectTerminals(
+            self.dippid_node1["accelX"], buffer_node_x1["dataIn"])
+        self.fc.connectTerminals(
+            self.dippid_node1["accelY"], buffer_node_y1["dataIn"])
+        self.fc.connectTerminals(
+            self.dippid_node1["accelZ"], buffer_node_z1["dataIn"])
 
         # connect convolution node
         self.fc.connectTerminals(
-            buffer_node_x["dataOut"], self.convolveNode["accelX"])
+            buffer_node_x0["dataOut"], self.convolveNode0["accelX"])
         self.fc.connectTerminals(
-            buffer_node_y["dataOut"], self.convolveNode["accelY"])
+            buffer_node_y0["dataOut"], self.convolveNode0["accelY"])
         self.fc.connectTerminals(
-            buffer_node_z["dataOut"], self.convolveNode["accelZ"])
+            buffer_node_z0["dataOut"], self.convolveNode0["accelZ"])
+        self.fc.connectTerminals(
+            buffer_node_x1["dataOut"], self.convolveNode1["accelX"])
+        self.fc.connectTerminals(
+            buffer_node_y1["dataOut"], self.convolveNode1["accelY"])
+        self.fc.connectTerminals(
+            buffer_node_z1["dataOut"], self.convolveNode1["accelZ"])
 
         # connect train node to accelerator values
         self.fc.connectTerminals(
-            self.train_node["accelerator_x"], self.convolveNode["frequencyX"])
+            self.train_node["accelerator_x"], self.convolveNode0["frequencyX"])
         self.fc.connectTerminals(
-            self.train_node["accelerator_y"], self.convolveNode["frequencyY"])
+            self.train_node["accelerator_y"], self.convolveNode0["frequencyY"])
         self.fc.connectTerminals(
-            self.train_node["accelerator_z"], self.convolveNode["frequencyZ"])
+            self.train_node["accelerator_z"], self.convolveNode0["frequencyZ"])
         self.fc.connectTerminals(
-            self.prediction_node["accelerator_x"], self.convolveNode["frequencyX"])
+            self.prediction_node0["accelerator_x"], self.convolveNode0["frequencyX"])
         self.fc.connectTerminals(
-            self.prediction_node["accelerator_y"], self.convolveNode["frequencyY"])
+            self.prediction_node0["accelerator_y"], self.convolveNode0["frequencyY"])
         self.fc.connectTerminals(
-            self.prediction_node["accelerator_z"], self.convolveNode["frequencyZ"])
+            self.prediction_node0["accelerator_z"], self.convolveNode0["frequencyZ"])
+        self.fc.connectTerminals(
+            self.prediction_node1["accelerator_x"], self.convolveNode1["frequencyX"])
+        self.fc.connectTerminals(
+            self.prediction_node1["accelerator_y"], self.convolveNode1["frequencyY"])
+        self.fc.connectTerminals(
+            self.prediction_node1["accelerator_z"], self.convolveNode1["frequencyZ"])
 
 
 class PredictionNode(Node):
